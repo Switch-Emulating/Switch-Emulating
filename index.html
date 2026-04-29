@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>r/SwitchEmulating</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --bg2: #111;
+    --bg3: #161616;
+    --border: #1e1e1e;
+    --border2: #2a2a2a;
+    --text: #fff;
+    --text2: #888;
+    --text3: #444;
+    --red: #e60012;
+    --red-hover: #ff0016;
+    --badge-stable-bg: #1a3a1a;
+    --badge-stable-text: #4caf50;
+    --badge-nightly-bg: #3a2a1a;
+    --badge-nightly-text: #ff9800;
+    --badge-legacy-bg: #1a1a3a;
+    --badge-legacy-text: #7b8cff;
+    --toggle-bg: #1e1e1e;
+    --footer: #333;
+  }
+  [data-theme="light"] {
+    --bg: #f5f5f5;
+    --bg2: #fff;
+    --bg3: #fafafa;
+    --border: #e0e0e0;
+    --border2: #ccc;
+    --text: #111;
+    --text2: #555;
+    --text3: #aaa;
+    --red: #e60012;
+    --red-hover: #c0000f;
+    --badge-stable-bg: #e6f4e6;
+    --badge-stable-text: #2e7d32;
+    --badge-nightly-bg: #fff3e0;
+    --badge-nightly-text: #e65100;
+    --badge-legacy-bg: #ededff;
+    --badge-legacy-text: #3a3a9e;
+    --toggle-bg: #ddd;
+    --footer: #bbb;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    min-height: 100vh;
+    font-family: 'Outfit', sans-serif;
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 3rem 1rem;
+    transition: background 0.3s, color 0.3s;
+  }
+  .content { width: 100%; max-width: 560px; }
+  .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5rem; }
+  .logo-tag { 
+    font-size: 12px; 
+    font-weight: 600; 
+    letter-spacing: 0.15em; 
+    color: var(--red); 
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: opacity 0.2s;
+  }
+  .logo-tag:hover {
+    opacity: 0.8;
+    text-decoration: none;
+  }
+  .theme-toggle { display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; }
+  .theme-toggle span { font-size: 12px; color: var(--text2); font-weight: 500; }
+  .toggle-track { width: 40px; height: 22px; background: var(--toggle-bg); border-radius: 99px; position: relative; transition: background 0.3s; border: 1px solid var(--border2); }
+  .toggle-knob { width: 16px; height: 16px; background: var(--red); border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: transform 0.25s cubic-bezier(.4,0,.2,1); }
+  [data-theme="light"] .toggle-knob { transform: translateX(18px); }
+  .header { text-align: center; margin-bottom: 2.5rem; }
+  h1 { font-size: clamp(2.8rem, 10vw, 4.5rem); font-weight: 700; line-height: 1.05; color: var(--text); letter-spacing: -0.02em; }
+  h1 span { color: var(--red); }
+  .subtitle { margin-top: 0.6rem; font-size: 13px; color: var(--text2); font-weight: 400; }
+  .platform-tabs { display: flex; gap: 0; margin-bottom: 1.5rem; width: 100%; justify-content: center; }
+  .tab { 
+    flex: 0 1 auto; 
+    min-width: 140px;
+    font-size: 14px; 
+    font-weight: 600; 
+    padding: 10px 24px; 
+    border: 1px solid var(--border2); 
+    background: transparent; 
+    color: var(--text2); 
+    cursor: pointer; 
+    font-family: 'Outfit', sans-serif; 
+    text-transform: uppercase; 
+    letter-spacing: 0.08em; 
+    transition: all 0.15s; 
+    text-align: center; 
+    border-radius: 99px;
+  }
+  .tab:hover { border-color: var(--red); color: var(--text); background: var(--bg3); }
+  .tab.active { background: var(--red); color: #fff; border-color: var(--red); }
+  .section-label { font-size: 11px; font-weight: 600; letter-spacing: 0.2em; color: var(--text3); text-transform: uppercase; margin-bottom: 0.75rem; }
+  .platform-section { display: none; }
+  .platform-section.active { display: block; }
+  .card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 0.9rem 1.1rem; display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; transition: border-color 0.2s, background 0.2s; gap: 0.75rem; }
+  .card:hover { border-color: var(--border2); background: var(--bg3); }
+  .card-info { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+  .card-name { font-size: 14px; font-weight: 600; color: var(--text); }
+  .card-meta { font-size: 11px; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .badge { font-size: 9px; padding: 3px 8px; border-radius: 99px; letter-spacing: 0.08em; font-weight: 700; text-transform: uppercase; flex-shrink: 0; }
+  .badge-stable { background: var(--badge-stable-bg); color: var(--badge-stable-text); }
+  .badge-nightly { background: var(--badge-nightly-bg); color: var(--badge-nightly-text); }
+  .badge-legacy { background: var(--badge-legacy-bg); color: var(--badge-legacy-text); }
+  .btn-group { display: flex; gap: 6px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
+  .dl-btn { display: inline-flex; align-items: center; gap: 5px; background: var(--red); color: #fff; border: none; border-radius: 8px; padding: 8px 14px; font-family: 'Outfit', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 0.05em; cursor: pointer; text-decoration: none; flex-shrink: 0; transition: background 0.15s, transform 0.1s; }
+  .dl-btn:hover { background: var(--red-hover); }
+  .dl-btn:active { transform: scale(0.96); }
+  .dl-btn svg { width: 13px; height: 13px; fill: #fff; }
+  .dl-btn-outline { display: inline-flex; align-items: center; gap: 5px; background: transparent; color: var(--red); border: 1px solid var(--red); border-radius: 8px; padding: 8px 14px; font-family: 'Outfit', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 0.05em; cursor: pointer; text-decoration: none; flex-shrink: 0; transition: background 0.15s, transform 0.1s; }
+  .dl-btn-outline:hover { background: var(--red); color: #fff; }
+  .dl-btn-outline:active { transform: scale(0.96); }
+  .dl-btn-outline svg { width: 13px; height: 13px; fill: currentColor; }
+  .dl-btn-ghost { display: inline-flex; align-items: center; gap: 5px; background: transparent; color: var(--text2); border: 1px solid var(--border2); border-radius: 8px; padding: 8px 14px; font-family: 'Outfit', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 0.05em; cursor: pointer; text-decoration: none; flex-shrink: 0; transition: background 0.15s, transform 0.1s, color 0.15s; }
+  .dl-btn-ghost:hover { border-color: var(--text2); color: var(--text); }
+  .dl-btn-ghost:active { transform: scale(0.96); }
+  .dl-btn-ghost svg { width: 13px; height: 13px; fill: currentColor; }
+  .divider { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0 1.25rem; }
+  .footer { margin-top: 2.5rem; text-align: center; font-size: 11px; color: var(--footer); }
+  .footer a { color: var(--footer); text-decoration: none; }
+  .footer a:hover { color: var(--red); }
+  .note { font-size: 10px; color: var(--text3); margin-top: 0.5rem; padding: 0 0.25rem; line-height: 1.5; }
+
+  .legacy-section { margin-top: 0.5rem; }
+  .legacy-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.75rem; }
+  .legacy-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 6px; transition: border-color 0.2s; }
+  .legacy-card:hover { border-color: var(--border2); }
+  .legacy-card-name { font-size: 13px; font-weight: 600; color: var(--text); }
+  .legacy-card-meta { font-size: 10px; color: var(--text2); }
+</style>
+</head>
+<body>
+<div class="content">
+
+  <div class="topbar">
+    <a href="https://www.reddit.com/r/SwitchEmulating/" target="_blank" class="logo-tag" style="text-decoration: none;">r/SwitchEmulating</a>
+    <div class="theme-toggle" onclick="toggleTheme()">
+      <span id="theme-label">Dark</span>
+      <div class="toggle-track"><div class="toggle-knob"></div></div>
+    </div>
+  </div>
+
+  <div class="header">
+    <h1>Switch<span>.</span><br>Emulating</h1>
+    <p class="subtitle">Everything you need. Always up to date.</p>
+  </div>
+
+  <!-- Single Universal Tab -->
+  <div class="platform-tabs">
+    <button class="tab active" onclick="showUniversal()">Universal</button>
+  </div>
+
+  <!-- Universal Section: consolidated builds across platforms -->
+  <div id="universal" class="platform-section active">
+    <div class="section-label">Cross‑Platform Builds</div>
+
+    <!-- Eden: Universal -->
+    <div class="card">
+      <div class="card-info">
+        <div class="card-name">Eden</div>
+        <div class="card-meta">Most active · Best compatibility · Windows / Linux / Android / macOS</div>
+      </div>
+      <span class="badge badge-stable">Stable</span>
+      <a href="https://git.eden-emu.dev/eden-emu/eden/releases" target="_blank" class="dl-btn-outline">
+        <svg viewBox="0 0 24 24"><path d="M10 6v2H5v11h11v-5h2v7H3V6h7zm11-3v8l-3-3-7 7-1-1 7-7-3-3h8z"/></svg>
+        Releases
+      </a>
+    </div>
+
+    <!-- Citron: Universal -->
+    <div class="card">
+      <div class="card-info">
+        <div class="card-name">Citron</div>
+        <div class="card-meta">Yuzu fork · High compatibility · Windows / Linux / Android / macOS</div>
+      </div>
+      <span class="badge badge-stable">Stable</span>
+      <a href="https://git.citron-emu.org/Citron/Emulator/releases" target="_blank" class="dl-btn-outline">
+        <svg viewBox="0 0 24 24"><path d="M10 6v2H5v11h11v-5h2v7H3V6h7zm11-3v8l-3-3-7 7-1-1 7-7-3-3h8z"/></svg>
+        Releases
+      </a>
+    </div>
+
+    <!-- Citron NEO: Universal -->
+    <div class="card">
+      <div class="card-info">
+        <div class="card-name">Citron NEO</div>
+        <div class="card-meta">Unhinged nightly · Bleeding edge · Windows / Linux / Android / macOS</div>
+      </div>
+      <span class="badge badge-nightly">Nightly</span>
+      <a href="https://github.com/citron-neo/emulator/releases/latest" target="_blank" class="dl-btn-outline">
+        <svg viewBox="0 0 24 24"><path d="M10 6v2H5v11h11v-5h2v7H3V6h7zm11-3v8l-3-3-7 7-1-1 7-7-3-3h8z"/></svg>
+        Releases
+      </a>
+    </div>
+
+    <!-- Ryubing: Universal -->
+    <div class="card">
+      <div class="card-info">
+        <div class="card-name">Ryubing</div>
+        <div class="card-meta">Ryujinx fork · High accuracy · Windows / Linux / macOS</div>
+      </div>
+      <span class="badge badge-stable">Stable</span>
+      <a href="https://git.ryujinx.app/projects/Ryubing/releases" target="_blank" class="dl-btn-outline">
+        <svg viewBox="0 0 24 24"><path d="M10 6v2H5v11h11v-5h2v7H3V6h7zm11-3v8l-3-3-7 7-1-1 7-7-3-3h8z"/></svg>
+        Releases
+      </a>
+    </div>
+
+    <!-- Ryubing Canary: Universal -->
+    <div class="card">
+      <div class="card-info">
+        <div class="card-name">Ryubing Canary</div>
+        <div class="card-meta">Unstable nightly Ryubing builds · Windows / Linux / macOS</div>
+      </div>
+      <span class="badge badge-nightly">Nightly</span>
+      <a href="https://git.ryujinx.app/Ryubing/Canary/releases" target="_blank" class="dl-btn-outline">
+        <svg viewBox="0 0 24 24"><path d="M10 6v2H5v11h11v-5h2v7H3V6h7zm11-3v8l-3-3-7 7-1-1 7-7-3-3h8z"/></svg>
+        Releases
+      </a>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- KEYS & FIRMWARE -->
+  <div class="section-label">Also Required</div>
+  <div class="card">
+    <div class="card-info">
+      <div class="card-name">Prod &amp; Title Keys</div>
+      <div class="card-meta">Required for all emulators · Latest version</div>
+    </div>
+    <a href="https://prodkeys.net" target="_blank" class="dl-btn-outline">
+      <svg viewBox="0 0 24 24"><path d="M10 6v2H5v11h11v-5h2v7H3V6h7zm11-3v8l-3-3-7 7-1-1 7-7-3-3h8z"/></svg>
+      Get Keys
+    </a>
+  </div>
+  <div class="card">
+    <div class="card-info">
+      <div class="card-name">Switch Firmware</div>
+      <div class="card-meta">Match your keys version · Latest firmware</div>
+    </div>
+    <a href="https://prodkeys.net/latest-switch-firmwares-updated/" target="_blank" class="dl-btn-outline">
+      <svg viewBox="0 0 24 24"><path d="M10 6v2H5v11h11v-5h2v7H3V6h7zm11-3v8l-3-3-7 7-1-1 7-7-3-3h8z"/></svg>
+      Get Firmware
+    </a>
+  </div>
+
+  <hr class="divider">
+
+  <!-- GAME DOWNLOADS SECTION -->
+  <div class="section-label">Game Downloads</div>
+  <div class="card">
+    <div class="card-info">
+      <div class="card-name">Eggns Emulator ROMs</div>
+      <div class="card-meta">Nintendo Switch ROM collection · Regular updates</div>
+    </div>
+    <a href="https://eggnsemulator.com/nintendo-switch-roms/" target="_blank" class="dl-btn-outline">
+      <svg viewBox="0 0 24 24"><path d="M10 6v2H5v11h11v-5h2v7H3V6h7zm11-3v8l-3-3-7 7-1-1 7-7-3-3h8z"/></svg>
+      Browse ROMs
+    </a>
+  </div>
+  <div class="card">
+    <div class="card-info">
+      <div class="card-name">NSWPedia</div>
+      <div class="card-meta">Nintendo Switch ROMs database · Large library</div>
+    </div>
+    <a href="https://nswpedia.com/nintendo-switch-roms/page/4" target="_blank" class="dl-btn-outline">
+      <svg viewBox="0 0 24 24"><path d="M10 6v2H5v11h11v-5h2v7H3V6h7zm11-3v8l-3-3-7 7-1-1 7-7-3-3h8z"/></svg>
+      Browse ROMs
+    </a>
+  </div>
+
+  <hr class="divider">
+
+  <!-- LEGACY ARCHIVE -->
+  <div class="section-label">Legacy Archive</div>
+  <p class="note" style="margin-bottom: 0.75rem;">Original Yuzu, Ryujinx, and older builds — hosted by r/SwitchEmulating. These are frozen snapshots, not updated.</p>
+  <div class="legacy-grid">
+    <div class="legacy-card">
+      <div class="legacy-card-name">Windows</div>
+      <div class="legacy-card-meta">Yuzu, Ryujinx + more</div>
+      <a href="https://drive.google.com/drive/folders/1idem8rH4n_TUEm5sR9BpcClQMvCYQYmd" target="_blank" class="dl-btn-ghost" style="margin-top: 4px; justify-content: center;">
+        <svg viewBox="0 0 24 24"><path d="M10 6v2H5v11h11v-5h2v7H3V6h7zm11-3v8l-3-3-7 7-1-1 7-7-3-3h8z"/></svg>
+        Browse
+      </a>
+    </div>
+    <div class="legacy-card">
+      <div class="legacy-card-name">Android</div>
+      <div class="legacy-card-meta">Yuzu Android + more</div>
+      <a href="https://drive.google.com/drive/folders/1qTCH5yN2RYivEdoUoISS4BuXXbDWbrZu" target="_blank" class="dl-btn-ghost" style="margin-top: 4px; justify-content: center;">
+        <svg viewBox="0 0 24 24"><path d="M10 6v2H5v11h11v-5h2v7H3V6h7zm11-3v8l-3-3-7 7-1-1 7-7-3-3h8z"/></svg>
+        Browse
+      </a>
+    </div>
+    <div class="legacy-card">
+      <div class="legacy-card-name">Linux</div>
+      <div class="legacy-card-meta">Yuzu Linux + more</div>
+      <a href="https://drive.google.com/drive/folders/1MBkLV9cHCVWFmuJe07v0mfdUO8hhyV_5" target="_blank" class="dl-btn-ghost" style="margin-top: 4px; justify-content: center;">
+        <svg viewBox="0 0 24 24"><path d="M10 6v2H5v11h11v-5h2v7H3V6h7zm11-3v8l-3-3-7 7-1-1 7-7-3-3h8z"/></svg>
+        Browse
+      </a>
+    </div>
+    <div class="legacy-card">
+      <div class="legacy-card-name">macOS</div>
+      <div class="legacy-card-meta">Yuzu macOS + more</div>
+      <a href="https://drive.google.com/drive/folders/187QOztp4cfxetGYT2t7QnLvGm-6GN1Kw" target="_blank" class="dl-btn-ghost" style="margin-top: 4px; justify-content: center;">
+        <svg viewBox="0 0 24 24"><path d="M10 6v2H5v11h11v-5h2v7H3V6h7zm11-3v8l-3-3-7 7-1-1 7-7-3-3h8z"/></svg>
+        Browse
+      </a>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>r/SwitchEmulating &mdash; <a href="https://reddit.com/r/switchemulating">reddit</a></p>
+    <p style="margin-top: 5px;">Emulation is legal. Buy games you love.</p>
+  </div>
+
+</div>
+
+<script>
+// Universal view activator - simple and clean
+function showUniversal() {
+  document.querySelectorAll('.platform-section').forEach(s => s.classList.remove('active'));
+  const universalSection = document.getElementById('universal');
+  if (universalSection) universalSection.classList.add('active');
+  const tabs = document.querySelectorAll('.tab');
+  tabs.forEach(t => t.classList.remove('active'));
+  if (tabs[0]) tabs[0].classList.add('active');
+}
+
+// Theme toggling
+function toggleTheme() {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  const themeLabel = document.getElementById('theme-label');
+  if (themeLabel) themeLabel.textContent = isDark ? 'Light' : 'Dark';
+}
+
+// Initialize - ensure universal section is active
+window.addEventListener('DOMContentLoaded', () => {
+  showUniversal();
+});
+</script>
+</body>
+</html>
